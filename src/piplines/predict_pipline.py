@@ -1,7 +1,12 @@
 import sys
+import os
 import pandas as pd
-from src.exception import CustomException
-from src.utils import load_object
+parent_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), os.pardir))
+
+sys.path.append(parent_dir)
+from exception import CustomException
+from utils import load_object
+
 import os
 
 class PredictPipeline:

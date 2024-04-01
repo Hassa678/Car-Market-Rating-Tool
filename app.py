@@ -1,45 +1,33 @@
-from flask import Flask,request,render_template
-import numpy as np
+from flask import Flask, request, render_template
+from src.piplines.predict_pipline import CustomData, PredictPipeline
 import pandas as pd
 
-from src.piplines.predict_pipline import CustomData,PredictPipeline
+app = Flask(__name__)
 
-
-import pandas as pd
-
-# Assuming df is your DataFrame
-df = pd.read_csv('Notebook\cargurus.csv')
-# Select only categorical columns
+# Load the data
+df = pd.read_csv('Notebook/cargurus.csv')
 categorical_columns = df.select_dtypes(include=['object']).columns
-numerical_columns = df.select_dtypes(exclude=['object']).columns
-# Create an empty dictionary to store unique values
+categorical_columns = categorical_columns.drop('dealRating')
+numerical_columns = ['carYear', 'mileage', 'priceDifferential', 'daysOnMarket',
+                     'sellerId', 'listingPartnerId', 'sellerPostalCode', 'distance',
+                     'serviceProviderId', 'sellerRating', 'reviewCount']
+
+        # Calculate unique values dynamically based on the form data
 unique_values_dict = {}
-
-# Iterate over each categorical column
 for column in categorical_columns:
-    # Get unique values for the column
     unique_values = df[column].unique()
-    # Store the unique values in the dictionary
     unique_values_dict[column] = unique_values
-
-
-
-
-application=Flask(__name__)
-
-app=application
-
-## Route for a home page
 
 @app.route('/')
 def index():
     return render_template('index.html') 
 
-@app.route('/predictdata',methods=['GET','POST'])
+@app.route('/predictdata', methods=['GET', 'POST'])
 def predict_datapoint():
-    if request.method=='GET':
-        return render_template('home.html')
+    if request.method == 'GET':
+        return render_template('home.html', cate_value=unique_values_dict, num_value=numerical_columns)
     else:
+        # Create CustomData object from form data
         data = CustomData(
             makeName=request.form.get('makeName'),
             modelName=request.form.get('modelName'),
@@ -47,7 +35,7 @@ def predict_datapoint():
             carYear=int(request.form.get('carYear')),
             trimName=request.form.get('trimName'),
             localizedTransmission=request.form.get('localizedTransmission'),
-             bodyTypeGroupId=request.form.get('bodyTypeGroupId'),
+            bodyTypeGroupId=request.form.get('bodyTypeGroupId'),
             bodyTypeName=request.form.get('bodyTypeName'),
             mileage=float(request.form.get('mileage')),
             exteriorColorName=request.form.get('exteriorColorName'),
@@ -73,17 +61,15 @@ def predict_datapoint():
             localizedEngineDisplayName=request.form.get('localizedEngineDisplayName'),
             ncapOverallSafetyRating=request.form.get('ncapOverallSafetyRating'),
             interiorColor=request.form.get('interiorColor')
-            )
-        pred_df=data.get_data_as_data_frame()
-        print(pred_df)
-        print("Before Prediction")
+        )
 
-        predict_pipeline=PredictPipeline()
-        print("Mid Prediction")
-        results=predict_pipeline.predict(pred_df)
-        print("after Prediction")
-        return render_template('home.html',results=results[0],cate_value=unique_values_dict,num_value=numerical_columns)
-    
+        # Perform prediction
+        pred_df = data.get_data_as_data_frame()
+        predict_pipeline = PredictPipeline()
+        results = predict_pipeline.predict(pred_df)
 
-if __name__=="__main__":
-    app.run(host="0.0.0.0")        
+        return render_template('home.html', results=results[0],cate_value=unique_values_dict, num_value=numerical_columns)
+
+
+if __name__ == "__main__":
+    app.run(host="0.0.0.0", debug=False)
