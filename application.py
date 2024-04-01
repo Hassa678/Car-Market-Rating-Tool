@@ -2,7 +2,9 @@ from flask import Flask, request, render_template
 from src.piplines.predict_pipline import CustomData, PredictPipeline
 import pandas as pd
 
-app = Flask(__name__)
+application = Flask(__name__)
+
+app = application
 
 # Load the data
 df = pd.read_csv('Notebook/cargurus.csv')
