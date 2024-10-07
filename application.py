@@ -11,8 +11,8 @@ df = pd.read_csv('Notebook/cargurus.csv')
 categorical_columns = df.select_dtypes(include=['object']).columns
 categorical_columns = categorical_columns.drop('dealRating')
 numerical_columns = ['carYear', 'mileage', 'priceDifferential', 'daysOnMarket',
-                     'sellerId', 'listingPartnerId', 'sellerPostalCode', 'distance',
-                     'serviceProviderId', 'sellerRating', 'reviewCount']
+                     'distance'
+                     ]
 
         # Calculate unique values dynamically based on the form data
 unique_values_dict = {}

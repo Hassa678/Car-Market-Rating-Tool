@@ -17,7 +17,6 @@ from dataclasses import dataclass
 class DataIngestionConfig:
     train_data_path: str = os.path.join('artifact', 'train_data.csv')
     test_data_path: str = os.path.join('artifact', 'test_data.csv')
-    raw_data_path: str = os.path.join('artifact', 'data.csv')
 
 class DataIngestion:
     def __init__(self):
@@ -27,7 +26,7 @@ class DataIngestion:
         logging.info("Starting data ingestion")
         try:
         # Read the dataset from CSV
-            df = pd.read_csv('Notebook\cargurus.csv')
+            df = pd.read_csv('artifact/data.csv')
         
         # Drop unnecessary column and duplicate rows
             df = df.drop('Unnamed: 0', axis=1)
@@ -41,12 +40,6 @@ class DataIngestion:
             df[['dealRating']] = imp_most_frequent.fit_transform(df[['dealRating']])
         
 
-        
-        # Save raw data to CSV
-            os.makedirs(os.path.dirname(self.ingestion_config.raw_data_path), exist_ok=True)
-            df.to_csv(self.ingestion_config.raw_data_path, index=False, header=True)
-            logging.info("Raw data saved to CSV")
-        
         # Split data into train and test sets
             train_set, test_set = train_test_split(df, random_state=42, test_size=0.2)
             train_set.to_csv(self.ingestion_config.train_data_path, index=False, header=True)
